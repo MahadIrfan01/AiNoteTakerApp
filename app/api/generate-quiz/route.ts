@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey)
-    const model = genAI.getGenerativeModel({ model: 'gemini-pro' })
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
     const prompt = `You are an educational quiz generator. Based on the following notes, create a comprehensive quiz with 5-10 multiple choice questions. Each question should have 4 options with one correct answer. Format your response as a JSON array of questions, where each question has:
 - question: string (the question text)

@@ -46,6 +46,10 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
     setError('')
     setMessage('')
 
+    // #region agent log
+    fetch('http://127.0.0.1:7244/ingest/be299166-7fa1-4961-bdb5-582e381276bb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthPage.tsx:43',message:'Register function entry',data:{email,passwordLength:password.length},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,B,C,E'})}).catch(()=>{});
+    // #endregion
+
     if (password !== confirmPassword) {
       setError('Passwords do not match')
       setLoading(false)
@@ -59,21 +63,44 @@ export default function AuthPage({ onAuthSuccess }: AuthPageProps) {
     }
 
     try {
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/be299166-7fa1-4961-bdb5-582e381276bb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthPage.tsx:62',message:'Before signUp call',data:{email},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,B,E'})}).catch(()=>{});
+      // #endregion
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
       })
 
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/be299166-7fa1-4961-bdb5-582e381276bb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthPage.tsx:67',message:'After signUp call',data:{hasError:!!error,errorMessage:error?.message,hasUser:!!data?.user,userId:data?.user?.id,userEmail:data?.user?.email,emailConfirmedAt:data?.user?.email_confirmed_at,identities:data?.user?.identities?.length},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,B,E'})}).catch(()=>{});
+      // #endregion
+
       if (error) throw error
 
       if (data.user) {
-        setMessage('Registration successful! Please check your email to verify your account.')
+        // #region agent log
+        fetch('http://127.0.0.1:7244/ingest/be299166-7fa1-4961-bdb5-582e381276bb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthPage.tsx:69',message:'User created successfully',data:{userId:data.user.id,email:data.user.email,confirmed:data.user.email_confirmed_at,session:!!data.session},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'B,E'})}).catch(()=>{});
+        // #endregion
+
+        // Check if email confirmation is required
+        if (data.session) {
+          // User can login immediately (email confirmation disabled)
+          setMessage('Registration successful! You can now login.')
+          onAuthSuccess()
+        } else {
+          // Email confirmation is required
+          setMessage('Registration successful! Please check your email to verify your account. If you don\'t receive an email, check your spam folder or contact support.')
+        }
         setEmail('')
         setPassword('')
         setConfirmPassword('')
-        setTimeout(() => setMode('login'), 3000)
       }
     } catch (err: any) {
+      // #region agent log
+      fetch('http://127.0.0.1:7244/ingest/be299166-7fa1-4961-bdb5-582e381276bb',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'AuthPage.tsx:76',message:'Registration error caught',data:{errorMessage:err.message,errorName:err.name,fullError:JSON.stringify(err)},timestamp:Date.now(),sessionId:'debug-session',hypothesisId:'A,D,E'})}).catch(()=>{});
+      // #endregion
+
       setError(err.message || 'Failed to register')
     } finally {
       setLoading(false)

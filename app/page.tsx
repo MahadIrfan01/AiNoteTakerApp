@@ -7,6 +7,7 @@ import HomePage from '@/components/HomePage'
 import ClassesPage from '@/components/ClassesPage'
 import QuizHistoryPage from '@/components/QuizHistoryPage'
 import AnalyticsPage from '@/components/AnalyticsPage'
+import AITutorPage from '@/components/AITutorPage'
 import ProfilePage from '@/components/ProfilePage'
 import AuthPage from '@/components/AuthPage'
 import InvitePeopleModal from '@/components/InvitePeopleModal'
@@ -110,6 +111,8 @@ export default function Home() {
         return <QuizHistoryPage />
       case 'analytics':
         return <AnalyticsPage />
+      case 'ai-tutor':
+        return <AITutorPage />
       case 'profile':
         return <ProfilePage onLogout={handleLogout} />
       default:
@@ -135,6 +138,7 @@ export default function Home() {
               {currentPage === 'classes' && 'My Classes'}
               {currentPage === 'quiz-history' && 'Quiz History'}
               {currentPage === 'analytics' && 'Analytics'}
+              {currentPage === 'ai-tutor' && 'AI Tutor'}
               {currentPage === 'profile' && 'Profile'}
             </h2>
           </div>

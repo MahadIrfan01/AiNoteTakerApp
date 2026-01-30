@@ -6,6 +6,8 @@ export async function POST(request: NextRequest) {
   try {
     const { message, conversationHistory } = await request.json()
 
+    console.log('[AI Tutor] Request received:', { hasMessage: !!message, messageLength: message?.length })
+
     if (!message) {
       return NextResponse.json(
         { error: 'Message is required' },
@@ -13,7 +15,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    console.log('[AI Tutor] API key check:', { hasApiKey: !!GEMINI_API_KEY })
+
     if (!GEMINI_API_KEY) {
+      console.error('[AI Tutor] API key not configured')
       return NextResponse.json(
         { error: 'Gemini API key not configured' },
         { status: 500 }
@@ -38,6 +43,8 @@ export async function POST(request: NextRequest) {
     }
 
     conversationContext += `Student: ${message}\nTutor:`
+
+    console.log('[AI Tutor] Calling Gemini API...')
 
     // Call Gemini API
     const response = await fetch(
@@ -67,13 +74,17 @@ export async function POST(request: NextRequest) {
       }
     )
 
+    console.log('[AI Tutor] Gemini API response:', { ok: response.ok, status: response.status })
+
     if (!response.ok) {
       const errorData = await response.json()
-      console.error('Gemini API error:', errorData)
+      console.error('[AI Tutor] Gemini API error:', errorData)
       throw new Error('Failed to get response from AI')
     }
 
     const data = await response.json()
+    
+    console.log('[AI Tutor] Response parsed:', { hasCandidates: !!data.candidates })
     
     if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
       throw new Error('Invalid response from AI')
@@ -81,9 +92,11 @@ export async function POST(request: NextRequest) {
 
     const aiResponse = data.candidates[0].content.parts[0].text
 
+    console.log('[AI Tutor] Success! Response length:', aiResponse?.length)
+
     return NextResponse.json({ response: aiResponse })
   } catch (error: any) {
-    console.error('AI Tutor error:', error)
+    console.error('[AI Tutor] Error:', error.message, error.stack)
     return NextResponse.json(
       { error: error.message || 'Failed to process request' },
       { status: 500 }

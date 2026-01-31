@@ -1,22 +1,26 @@
 -- ============================================
--- DATABASE UPDATE FOR NEW FEATURES
+-- DATABASE UPDATE FOR AUTHENTICATION
 -- ============================================
 -- Copy and paste this ENTIRE file into your Supabase SQL Editor
 -- Then click "RUN" to update your database
 -- ============================================
 
--- AUTHENTICATION SETUP
--- Add user_id columns for multi-user support
+-- Step 1: Add user_id columns for multi-user support
 ALTER TABLE classes ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
 ALTER TABLE invitations ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
 ALTER TABLE reminders ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE;
 
--- Create indexes for user_id
+-- Step 2: Add status and scheduled_date columns to quiz_results if they don't exist
+ALTER TABLE quiz_results ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'completed';
+ALTER TABLE quiz_results ADD COLUMN IF NOT EXISTS scheduled_date TIMESTAMP WITH TIME ZONE;
+
+-- Step 3: Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_classes_user_id ON classes(user_id);
 CREATE INDEX IF NOT EXISTS idx_invitations_user_id ON invitations(user_id);
 CREATE INDEX IF NOT EXISTS idx_reminders_user_id ON reminders(user_id);
+CREATE INDEX IF NOT EXISTS idx_quiz_results_status ON quiz_results(status);
 
--- Drop existing policies if any
+-- Step 4: Drop existing policies if any (to avoid conflicts)
 DROP POLICY IF EXISTS "Users can manage their own classes" ON classes;
 DROP POLICY IF EXISTS "Users can view their own classes" ON classes;
 DROP POLICY IF EXISTS "Users can insert their own classes" ON classes;
@@ -34,10 +38,10 @@ DROP POLICY IF EXISTS "Users can insert quiz results to their classes" ON quiz_r
 DROP POLICY IF EXISTS "Users can manage their own invitations" ON invitations;
 DROP POLICY IF EXISTS "Users can manage their own reminders" ON reminders;
 
--- Create RLS policies for classes
+-- Step 5: Create RLS policies for classes
 CREATE POLICY "Users can view their own classes"
   ON classes FOR SELECT
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = user_id OR user_id IS NULL);
 
 CREATE POLICY "Users can insert their own classes"
   ON classes FOR INSERT
@@ -45,19 +49,19 @@ CREATE POLICY "Users can insert their own classes"
 
 CREATE POLICY "Users can update their own classes"
   ON classes FOR UPDATE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = user_id OR user_id IS NULL);
 
 CREATE POLICY "Users can delete their own classes"
   ON classes FOR DELETE
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = user_id OR user_id IS NULL);
 
--- Create RLS policies for notes
+-- Step 6: Create RLS policies for notes
 CREATE POLICY "Users can view notes from their classes"
   ON notes FOR SELECT
   USING (EXISTS (
     SELECT 1 FROM classes
     WHERE classes.id = notes.class_id
-    AND classes.user_id = auth.uid()
+    AND (classes.user_id = auth.uid() OR classes.user_id IS NULL)
   ));
 
 CREATE POLICY "Users can insert notes to their classes"
@@ -65,7 +69,7 @@ CREATE POLICY "Users can insert notes to their classes"
   WITH CHECK (EXISTS (
     SELECT 1 FROM classes
     WHERE classes.id = notes.class_id
-    AND classes.user_id = auth.uid()
+    AND (classes.user_id = auth.uid() OR classes.user_id IS NULL)
   ));
 
 CREATE POLICY "Users can update notes from their classes"
@@ -73,7 +77,7 @@ CREATE POLICY "Users can update notes from their classes"
   USING (EXISTS (
     SELECT 1 FROM classes
     WHERE classes.id = notes.class_id
-    AND classes.user_id = auth.uid()
+    AND (classes.user_id = auth.uid() OR classes.user_id IS NULL)
   ));
 
 CREATE POLICY "Users can delete notes from their classes"
@@ -81,16 +85,16 @@ CREATE POLICY "Users can delete notes from their classes"
   USING (EXISTS (
     SELECT 1 FROM classes
     WHERE classes.id = notes.class_id
-    AND classes.user_id = auth.uid()
+    AND (classes.user_id = auth.uid() OR classes.user_id IS NULL)
   ));
 
--- Create RLS policies for quiz_results
+-- Step 7: Create RLS policies for quiz_results
 CREATE POLICY "Users can view quiz results from their classes"
   ON quiz_results FOR SELECT
   USING (EXISTS (
     SELECT 1 FROM classes
     WHERE classes.id = quiz_results.class_id
-    AND classes.user_id = auth.uid()
+    AND (classes.user_id = auth.uid() OR classes.user_id IS NULL)
   ));
 
 CREATE POLICY "Users can insert quiz results to their classes"
@@ -98,50 +102,25 @@ CREATE POLICY "Users can insert quiz results to their classes"
   WITH CHECK (EXISTS (
     SELECT 1 FROM classes
     WHERE classes.id = quiz_results.class_id
-    AND classes.user_id = auth.uid()
+    AND (classes.user_id = auth.uid() OR classes.user_id IS NULL)
   ));
 
--- Create RLS policies for invitations
+-- Step 8: Create RLS policies for invitations
 CREATE POLICY "Users can manage their own invitations"
   ON invitations FOR ALL
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = user_id OR user_id IS NULL);
 
--- Create RLS policies for reminders
+-- Step 9: Create RLS policies for reminders
 CREATE POLICY "Users can manage their own reminders"
   ON reminders FOR ALL
-  USING (auth.uid() = user_id);
+  USING (auth.uid() = user_id OR user_id IS NULL);
 
 -- ============================================
-
--- Add status and scheduled_date columns to quiz_results if they don't exist
-ALTER TABLE quiz_results ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'completed';
-ALTER TABLE quiz_results ADD COLUMN IF NOT EXISTS scheduled_date TIMESTAMP WITH TIME ZONE;
-
--- Create reminders table (NEW)
-CREATE TABLE IF NOT EXISTS reminders (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  class_id UUID NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
-  email TEXT NOT NULL,
-  reminder_datetime TIMESTAMP WITH TIME ZONE NOT NULL,
-  status TEXT DEFAULT 'pending',
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
-);
-
--- Create indexes for better query performance (NEW)
-CREATE INDEX IF NOT EXISTS idx_quiz_results_status ON quiz_results(status);
-CREATE INDEX IF NOT EXISTS idx_reminders_class_id ON reminders(class_id);
-CREATE INDEX IF NOT EXISTS idx_reminders_datetime ON reminders(reminder_datetime DESC);
-
--- Enable Row Level Security (NEW)
-ALTER TABLE reminders ENABLE ROW LEVEL SECURITY;
-
--- Create policies to allow all operations (NEW)
--- For production, you should customize these based on your auth requirements
--- Uncomment the line below if you want to enable the policy:
--- CREATE POLICY "Allow all operations on reminders" ON reminders
---   FOR ALL USING (true) WITH CHECK (true);
-
--- ============================================
--- That's it! Your database is now updated.
--- Close this window and start using the reminder features!
+-- SUCCESS! Your database is now updated with:
+-- ✓ user_id columns added to classes, invitations, and reminders
+-- ✓ RLS policies configured for multi-user support
+-- ✓ Backward compatibility for existing data (user_id IS NULL)
+-- ✓ All indexes created for optimal performance
+--
+-- You can now add classes and use all features!
 -- ============================================

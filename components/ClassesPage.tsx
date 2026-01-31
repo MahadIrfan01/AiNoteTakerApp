@@ -38,8 +38,15 @@ export default function ClassesPage() {
 
   const handleAddClass = async (name: string) => {
     try {
+      console.log('[DEBUG H1] handleAddClass called with name:', name)
+
       const { data: { user } } = await supabase.auth.getUser()
+      
+      console.log('[DEBUG H1] User retrieved:', { hasUser: !!user, userId: user?.id })
+
       if (!user) throw new Error('User not authenticated')
+
+      console.log('[DEBUG H3] Before insert:', { name, user_id: user.id })
 
       const { data, error } = await supabase
         .from('classes')
@@ -47,10 +54,28 @@ export default function ClassesPage() {
         .select()
         .single()
 
+      console.log('[DEBUG H2,H3,H4] After insert:', { 
+        hasData: !!data, 
+        hasError: !!error, 
+        errorCode: error?.code, 
+        errorMessage: error?.message, 
+        errorDetails: error?.details,
+        errorHint: error?.hint,
+        fullError: error 
+      })
+
       if (error) throw error
       setClasses([data, ...classes])
       setIsAddClassOpen(false)
+
+      console.log('[DEBUG H5] Class added successfully:', { classId: data?.id })
     } catch (error) {
+      console.log('[DEBUG ERROR] Error caught:', { 
+        errorType: error?.constructor?.name, 
+        errorMessage: (error as any)?.message, 
+        errorCode: (error as any)?.code,
+        fullError: error 
+      })
       console.error('Error adding class:', error)
       alert('Failed to add class. Please try again.')
     }

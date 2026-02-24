@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Student Note Taker',
-  description: 'A simple yet elegant note-taking app with AI-powered quiz generation',
+  title: 'NoteAI',
+  description: 'Your intelligent study companion – organize classes, take notes, and generate AI-powered quizzes',
 }
 
 export default function RootLayout({

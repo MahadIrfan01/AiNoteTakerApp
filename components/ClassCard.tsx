@@ -71,12 +71,12 @@ export default function ClassCard({ classItem, onDelete }: ClassCardProps) {
 
   return (
     <>
-      <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow border border-gray-200 p-6">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 border border-gray-200 dark:border-gray-700 p-6">
         <div className="flex justify-between items-start mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">{classItem.name}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{classItem.name}</h2>
           <button
             onClick={() => onDelete(classItem.id)}
-            className="text-red-500 hover:text-red-700 transition-colors"
+            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 transition-colors"
             title="Delete class"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -86,7 +86,7 @@ export default function ClassCard({ classItem, onDelete }: ClassCardProps) {
         </div>
 
         <div className="mb-4">
-          <p className="text-sm text-gray-600 mb-2">
+          <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
             {notes.length} {notes.length === 1 ? 'note' : 'notes'}
           </p>
         </div>
@@ -94,7 +94,7 @@ export default function ClassCard({ classItem, onDelete }: ClassCardProps) {
         <div className="space-y-2">
           <button
             onClick={() => setIsNoteEditorOpen(true)}
-            className="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors text-sm font-medium flex items-center justify-center gap-2"
+            className="w-full px-4 py-2 bg-primary-600 dark:bg-blue-600 text-white rounded-lg hover:bg-primary-700 dark:hover:bg-blue-700 transition-colors duration-300 text-sm font-medium flex items-center justify-center gap-2"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -104,18 +104,18 @@ export default function ClassCard({ classItem, onDelete }: ClassCardProps) {
 
           {notes.length > 0 && (
             <>
-              <div className="border-t border-gray-200 pt-3 mt-3">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">Notes:</h3>
+              <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-3">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Notes:</h3>
                 <div className="space-y-2 max-h-48 overflow-y-auto">
                   {notes.map((note) => (
                     <div
                       key={note.id}
-                      className="bg-gray-50 rounded-lg p-3 text-sm text-gray-700 relative group"
+                      className="bg-gray-50 dark:bg-gray-700/80 rounded-lg p-3 text-sm text-gray-700 dark:text-gray-200 relative group transition-colors duration-300"
                     >
                       <p className="pr-8 break-words">{note.content}</p>
                       <button
                         onClick={() => handleDeleteNote(note.id)}
-                        className="absolute top-2 right-2 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-2 right-2 text-red-400 hover:text-red-600 dark:text-red-400 dark:hover:text-red-300 opacity-0 group-hover:opacity-100 transition-opacity"
                         title="Delete note"
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,7 +129,7 @@ export default function ClassCard({ classItem, onDelete }: ClassCardProps) {
 
               <button
                 onClick={() => setIsQuizOpen(true)}
-                className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium flex items-center justify-center gap-2 mt-3"
+                className="w-full px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-300 text-sm font-medium flex items-center justify-center gap-2 mt-3"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

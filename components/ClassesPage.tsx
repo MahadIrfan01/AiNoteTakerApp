@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { supabase, Class } from '@/lib/supabase'
 import ClassCard from './ClassCard'
 import AddClassModal from './AddClassModal'
+import Logo from './Logo'
 
 export default function ClassesPage() {
   const [classes, setClasses] = useState<Class[]>([])
@@ -77,22 +78,22 @@ export default function ClassesPage() {
     return (
       <div className="p-8 max-w-7xl mx-auto">
         <div className="flex items-center justify-center h-64">
-          <div className="text-lg text-gray-600">Loading...</div>
+          <div className="text-lg text-gray-600 dark:text-gray-300">Loading...</div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="p-8 max-w-7xl mx-auto">
+    <div className="p-8 max-w-7xl mx-auto transition-colors duration-300">
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Classes</h1>
-          <p className="text-gray-600">Manage your classes and study materials</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">My Classes</h1>
+          <p className="text-gray-600 dark:text-gray-300">Manage your classes and study materials</p>
         </div>
         <button
           onClick={() => setIsAddClassOpen(true)}
-          className="px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-colors font-medium flex items-center gap-2"
+          className="px-6 py-3 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 transition-colors duration-300 font-medium flex items-center gap-2"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -102,15 +103,15 @@ export default function ClassesPage() {
       </div>
 
       {classes.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl shadow-sm border border-gray-200">
-          <svg className="w-20 h-20 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-          </svg>
-          <p className="text-gray-600 text-lg mb-2">No classes yet</p>
-          <p className="text-gray-500 mb-4">Click "Add Class" to get started</p>
+        <div className="text-center py-16 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+          <div className="flex justify-center mb-4">
+            <Logo size="lg" showWordmark={false} />
+          </div>
+          <p className="text-gray-600 dark:text-gray-200 text-lg mb-2">No classes yet</p>
+          <p className="text-gray-500 dark:text-gray-400 mb-4">Click "Add Class" to get started</p>
           <button
             onClick={() => setIsAddClassOpen(true)}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium inline-flex items-center gap-2"
+            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-300 font-medium inline-flex items-center gap-2"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

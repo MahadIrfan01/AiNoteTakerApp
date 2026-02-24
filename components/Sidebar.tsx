@@ -1,5 +1,7 @@
 'use client'
 
+import Logo from './Logo'
+
 interface SidebarProps {
   currentPage: string
   onNavigate: (page: string) => void
@@ -16,17 +18,10 @@ export default function Sidebar({ currentPage, onNavigate }: SidebarProps) {
   ]
 
   return (
-    <aside className="w-64 bg-gray-100 border-r border-gray-200 h-screen flex flex-col fixed left-0 top-0">
+    <aside className="w-64 bg-gray-100 dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 h-screen flex flex-col fixed left-0 top-0 transition-colors duration-300">
       {/* Logo */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-            </svg>
-          </div>
-          <span className="text-xl font-bold text-gray-900">NoteAI</span>
-        </div>
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <Logo size="sm" showWordmark />
       </div>
 
       {/* Menu */}
@@ -38,8 +33,8 @@ export default function Sidebar({ currentPage, onNavigate }: SidebarProps) {
               onClick={() => onNavigate(item.id)}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
                 currentPage === item.id
-                  ? 'bg-gray-200 text-blue-600 font-medium'
-                  : 'text-gray-600 hover:bg-gray-200/70'
+                  ? 'bg-gray-200 dark:bg-gray-700 text-blue-600 dark:text-blue-400 font-medium'
+                  : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/70 dark:hover:bg-gray-700/70'
               }`}
             >
               <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -51,11 +46,19 @@ export default function Sidebar({ currentPage, onNavigate }: SidebarProps) {
         </div>
       </nav>
 
-      {/* Footer - Settings with N avatar */}
-      <div className="p-4 border-t border-gray-200">
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-200/70 transition-colors">
-          <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 text-indigo-700 font-semibold text-sm">
-            N
+      {/* Footer - Settings (clickable) */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+        <button
+          type="button"
+          onClick={() => onNavigate('settings')}
+          className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
+            currentPage === 'settings'
+              ? 'bg-gray-200 dark:bg-gray-700 text-blue-600 dark:text-blue-400 font-medium'
+              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-200/70 dark:hover:bg-gray-700/70'
+          }`}
+        >
+          <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center shrink-0 text-indigo-700 dark:text-indigo-300 font-semibold text-sm">
+            n
           </div>
           Settings
         </button>

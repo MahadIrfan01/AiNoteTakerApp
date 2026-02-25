@@ -1,0 +1,4 @@
+{"sessionId":"72a111","location":"route.ts:POST","message":"Received request","data":{"attachmentCount":1,"attachmentTypes":["pdf"],"msgLen":46},"timestamp":1771987480045,"runId":"fix-run","hypothesisId":"H-upload"}
+{"sessionId":"72a111","location":"route.ts:extractPdfText","message":"Attempting PDF parse","data":{"bufferBytes":111236},"timestamp":1771987480045,"runId":"post-fix","hypothesisId":"H-pdf"}
+{"sessionId":"72a111","location":"route.ts:extractPdfText","message":"PDF parsed successfully","data":{"textLength":3482},"timestamp":1771987480235,"runId":"post-fix-v2","hypothesisId":"H-pdf"}
+{"sessionId":"72a111","location":"route.ts:POST","message":"Received request","data":{"attachmentCount":0,"attachmentTypes":[],"msgLen":32},"timestamp":1771987509161,"runId":"fix-run","hypothesisId":"H-upload"}

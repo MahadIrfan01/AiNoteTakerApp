@@ -17,14 +17,11 @@ async function extractPdfText(base64Data: string): Promise<string> {
   if (buffer.length > MAX_PDF_SIZE_BYTES) {
     throw new Error('PDF is too large (max 10MB)')
   }
-  const { PDFParse } = await import('pdf-parse')
-  const parser = new PDFParse({ data: new Uint8Array(buffer) })
-  try {
-    const result = await parser.getText()
-    return result.text || ''
-  } finally {
-    await parser.destroy()
-  }
+  // Use lib path directly to avoid pdf-parse loading its test suite (known webpack compat issue)
+  const pdfParseLib = await import('pdf-parse/lib/pdf-parse.js' as string)
+  const pdfParse: (buf: Buffer) => Promise<{ text: string }> = pdfParseLib.default ?? pdfParseLib
+  const result = await pdfParse(buffer)
+  return result?.text || ''
 }
 
 export async function POST(request: NextRequest) {

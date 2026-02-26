@@ -75,8 +75,8 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
   const score = quiz.length > 0 ? calculateScore() : { correct: 0, total: 0 }
 
   return (
-    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full p-6 my-8 border border-gray-200 dark:border-gray-700 transition-colors duration-300">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-start justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full p-6 mt-8 mb-8 border border-gray-200 dark:border-gray-700 transition-colors duration-300 shrink-0">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Generate Quiz</h2>
           <button

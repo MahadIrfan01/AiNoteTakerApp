@@ -3,13 +3,26 @@ import { GoogleGenerativeAI } from '@google/generative-ai'
 
 export async function POST(request: NextRequest) {
   try {
-    const { notes } = await request.json()
+    const body = await request.json()
+    const { notes, numQuestions = 5, difficulty = 'medium' } = body as {
+      notes?: string
+      numQuestions?: number
+      difficulty?: 'easy' | 'medium' | 'hard'
+    }
 
     if (!notes || notes.trim().length === 0) {
       return NextResponse.json(
         { error: 'Notes are required' },
         { status: 400 }
       )
+    }
+
+    const n = Math.min(20, Math.max(1, Math.floor(Number(numQuestions)) || 5))
+    const diff = ['easy', 'medium', 'hard'].includes(difficulty) ? difficulty : 'medium'
+    const diffInstructions: Record<string, string> = {
+      easy: 'Use simple vocabulary, straightforward questions, and obvious distractors. Focus on recall and basic understanding.',
+      medium: 'Use moderate complexity. Mix recall with some application. Include a few tricky distractors.',
+      hard: 'Use advanced vocabulary, multi-step reasoning, and subtle distractors. Require deep understanding and application.',
     }
 
     const apiKey = process.env.GEMINI_API_KEY
@@ -23,7 +36,8 @@ export async function POST(request: NextRequest) {
     const genAI = new GoogleGenerativeAI(apiKey)
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
-    const prompt = `You are an educational quiz generator. Based on the following notes, create a comprehensive quiz with 5-10 multiple choice questions. Each question should have 4 options with one correct answer. Format your response as a JSON array of questions, where each question has:
+    const prompt = `You are an educational quiz generator. Based on the following notes, create a quiz with exactly ${n} multiple choice questions. Difficulty: ${diff.toUpperCase()}. ${diffInstructions[diff]}
+Each question must have 4 options with one correct answer. Format your response as a JSON object, where each question has:
 - question: string (the question text)
 - options: array of 4 strings (the answer choices)
 - correct_answer: number (0-3, the index of the correct answer)
@@ -32,7 +46,7 @@ export async function POST(request: NextRequest) {
 Notes:
 ${notes}
 
-Return ONLY valid JSON in this format:
+Return ONLY valid JSON with exactly ${n} questions in this format:
 {
   "questions": [
     {

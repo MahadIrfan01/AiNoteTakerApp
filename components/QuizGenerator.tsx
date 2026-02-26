@@ -1,7 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Note, QuizQuestion } from '@/lib/supabase'
+
+type Difficulty = 'easy' | 'medium' | 'hard'
 
 interface QuizGeneratorProps {
   isOpen: boolean
@@ -15,8 +17,40 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
   const [isGenerating, setIsGenerating] = useState(false)
   const [selectedAnswers, setSelectedAnswers] = useState<{ [key: number]: number }>({})
   const [showResults, setShowResults] = useState(false)
+  const [timeLimit, setTimeLimit] = useState(10)
+  const [numQuestions, setNumQuestions] = useState(5)
+  const [difficulty, setDifficulty] = useState<Difficulty>('medium')
+  const [timeRemaining, setTimeRemaining] = useState<number | null>(null)
+  const [timeUp, setTimeUp] = useState(false)
+
+  // Countdown timer (must run before early return - hooks rules)
+  useEffect(() => {
+    if (timeRemaining === null || timeRemaining <= 0) return
+    const id = setInterval(() => {
+      setTimeRemaining((prev) => {
+        if (prev === null || prev <= 1) {
+          setTimeUp(true)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(id)
+  }, [timeRemaining !== null && timeRemaining > 0])
+
+  useEffect(() => {
+    if (timeUp && quiz.length > 0) {
+      setShowResults(true)
+    }
+  }, [timeUp, quiz.length])
 
   if (!isOpen) return null
+
+  const formatTime = (seconds: number) => {
+    const m = Math.floor(seconds / 60)
+    const s = seconds % 60
+    return `${m}:${s.toString().padStart(2, '0')}`
+  }
 
   const handleGenerateQuiz = async () => {
     if (notes.length === 0) {
@@ -24,9 +58,22 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
       return
     }
 
+    const q = Math.floor(Number(numQuestions)) || 5
+    const t = Math.floor(Number(timeLimit)) || 10
+    if (q < 1 || q > 20) {
+      alert('Number of questions must be between 1 and 20.')
+      return
+    }
+    if (t < 1) {
+      alert('Time limit must be at least 1 minute.')
+      return
+    }
+
     setIsGenerating(true)
     setShowResults(false)
     setSelectedAnswers({})
+    setTimeUp(false)
+    setTimeRemaining(null)
 
     try {
       const allNotes = notes.map(n => n.content).join('\n\n')
@@ -38,6 +85,8 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
         },
         body: JSON.stringify({
           notes: allNotes,
+          numQuestions: q,
+          difficulty,
         }),
       })
 
@@ -46,7 +95,9 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
       }
 
       const data = await response.json()
-      setQuiz(data.questions || [])
+      const questions = data.questions || []
+      setQuiz(questions)
+      setTimeRemaining(t * 60)
     } catch (error) {
       console.error('Error generating quiz:', error)
       alert('Failed to generate quiz. Please make sure you have set up your Gemini API key.')
@@ -90,13 +141,81 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
         </div>
 
         {quiz.length === 0 && !isGenerating && (
-          <div className="text-center py-8">
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <div className="space-y-6">
+            <p className="text-gray-600 dark:text-gray-400">
               Generate a quiz based on your notes using AI
             </p>
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="numQuestions" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Number of questions (1–20)
+                </label>
+                <input
+                  id="numQuestions"
+                  type="number"
+                  min={1}
+                  max={20}
+                  value={numQuestions}
+                  onChange={(e) => {
+                    const raw = e.target.value
+                    if (raw === '') setNumQuestions(1)
+                    else {
+                      const v = parseInt(raw, 10)
+                      if (!isNaN(v)) {
+                        if (v < 1) setNumQuestions(1)
+                        else if (v > 20) setNumQuestions(20)
+                        else setNumQuestions(v)
+                      }
+                    }
+                  }}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label htmlFor="timeLimit" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Time limit (minutes)
+                </label>
+                <input
+                  id="timeLimit"
+                  type="number"
+                  min={1}
+                  value={timeLimit}
+                  onChange={(e) => {
+                    const raw = e.target.value
+                    if (raw === '') setTimeLimit(1)
+                    else {
+                      const v = parseInt(raw, 10)
+                      if (!isNaN(v)) setTimeLimit(v < 1 ? 1 : v)
+                    }
+                  }}
+                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Difficulty
+                </label>
+                <div className="flex gap-2">
+                  {(['easy', 'medium', 'hard'] as const).map((d) => (
+                    <button
+                      key={d}
+                      type="button"
+                      onClick={() => setDifficulty(d)}
+                      className={`px-4 py-2 rounded-lg font-medium capitalize transition-colors ${
+                        difficulty === d
+                          ? 'bg-indigo-600 dark:bg-indigo-500 text-white'
+                          : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      }`}
+                    >
+                      {d}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
             <button
               onClick={handleGenerateQuiz}
-              className="px-6 py-3 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors font-medium"
+              className="w-full px-6 py-3 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors font-medium"
             >
               Generate Quiz
             </button>
@@ -112,10 +231,22 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
 
         {quiz.length > 0 && (
           <div>
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
               <p className="text-gray-600 dark:text-gray-400">
                 {quiz.length} {quiz.length === 1 ? 'question' : 'questions'}
               </p>
+              {!showResults && timeRemaining !== null && (
+                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg font-mono font-semibold ${
+                  timeUp ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-300' :
+                  timeRemaining <= 60 ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-200' :
+                  'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200'
+                }`}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {timeUp ? "Time's up!" : formatTime(timeRemaining)}
+                </div>
+              )}
               {showResults && (
                 <div className="text-lg font-semibold text-gray-900 dark:text-white">
                   Score: {score.correct}/{score.total}

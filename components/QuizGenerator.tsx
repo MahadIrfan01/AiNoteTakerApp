@@ -75,13 +75,13 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
   const score = quiz.length > 0 ? calculateScore() : { correct: 0, total: 0 }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
-      <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full p-6 my-8">
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4 overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-3xl w-full p-6 my-8 border border-gray-200 dark:border-gray-700 transition-colors duration-300">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-gray-900">Generate Quiz</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Generate Quiz</h2>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 transition-colors"
+            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -91,12 +91,12 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
 
         {quiz.length === 0 && !isGenerating && (
           <div className="text-center py-8">
-            <p className="text-gray-600 mb-4">
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
               Generate a quiz based on your notes using AI
             </p>
             <button
               onClick={handleGenerateQuiz}
-              className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors font-medium"
+              className="px-6 py-3 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors font-medium"
             >
               Generate Quiz
             </button>
@@ -105,19 +105,19 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
 
         {isGenerating && (
           <div className="text-center py-8">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 mb-4"></div>
-            <p className="text-gray-600">Generating quiz from your notes...</p>
+            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600 dark:border-indigo-400 mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Generating quiz from your notes...</p>
           </div>
         )}
 
         {quiz.length > 0 && (
           <div>
             <div className="flex justify-between items-center mb-4">
-              <p className="text-gray-600">
+              <p className="text-gray-600 dark:text-gray-400">
                 {quiz.length} {quiz.length === 1 ? 'question' : 'questions'}
               </p>
               {showResults && (
-                <div className="text-lg font-semibold">
+                <div className="text-lg font-semibold text-gray-900 dark:text-white">
                   Score: {score.correct}/{score.total}
                 </div>
               )}
@@ -125,14 +125,14 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
                 {!showResults && Object.keys(selectedAnswers).length === quiz.length && (
                   <button
                     onClick={() => setShowResults(true)}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                    className="px-4 py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors text-sm"
                   >
                     Check Answers
                   </button>
                 )}
                 <button
                   onClick={handleGenerateQuiz}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+                  className="px-4 py-2 bg-indigo-600 dark:bg-indigo-500 text-white rounded-lg hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors text-sm"
                   disabled={isGenerating}
                 >
                   Regenerate
@@ -148,15 +148,15 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
                 return (
                   <div
                     key={qIndex}
-                    className={`border rounded-lg p-4 ${
+                    className={`border rounded-lg p-4 transition-colors ${
                       showAnswer
                         ? isCorrect
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-red-500 bg-red-50'
-                        : 'border-gray-200'
+                          ? 'border-green-500 bg-green-50 dark:bg-green-900/30 dark:border-green-700'
+                          : 'border-red-500 bg-red-50 dark:bg-red-900/30 dark:border-red-700'
+                        : 'border-gray-200 dark:border-gray-600'
                     }`}
                   >
-                    <h3 className="font-semibold text-gray-900 mb-3">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3">
                       {qIndex + 1}. {question.question}
                     </h3>
                     <div className="space-y-2">
@@ -169,12 +169,12 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
                             key={oIndex}
                             className={`block p-3 rounded-lg border cursor-pointer transition-colors ${
                               showAnswer && isCorrectOption
-                                ? 'bg-green-100 border-green-500'
+                                ? 'bg-green-100 dark:bg-green-900/40 border-green-500 dark:border-green-600 text-gray-900 dark:text-white'
                                 : showAnswer && isSelected && !isCorrect
-                                ? 'bg-red-100 border-red-500'
+                                ? 'bg-red-100 dark:bg-red-900/40 border-red-500 dark:border-red-600 text-gray-900 dark:text-white'
                                 : isSelected
-                                ? 'bg-primary-50 border-primary-500'
-                                : 'bg-gray-50 border-gray-200 hover:border-primary-300'
+                                ? 'bg-primary-50 dark:bg-indigo-900/30 border-primary-500 dark:border-indigo-600 text-gray-900 dark:text-white'
+                                : 'bg-gray-50 dark:bg-gray-700/80 border-gray-200 dark:border-gray-600 hover:border-primary-300 dark:hover:border-indigo-500 text-gray-900 dark:text-gray-200'
                             }`}
                           >
                             <input
@@ -192,8 +192,8 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
                       })}
                     </div>
                     {showAnswer && question.explanation && (
-                      <div className="mt-3 p-3 bg-blue-50 rounded-lg">
-                        <p className="text-sm text-gray-700">
+                      <div className="mt-3 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-800">
+                        <p className="text-sm text-gray-700 dark:text-gray-200">
                           <strong>Explanation:</strong> {question.explanation}
                         </p>
                       </div>

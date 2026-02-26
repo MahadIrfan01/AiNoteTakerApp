@@ -59,13 +59,13 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
     }
 
     const q = Math.floor(Number(numQuestions)) || 5
-    const t = Math.floor(Number(timeLimit)) || 10
+    const t = Math.floor(Number(timeLimit))
     if (q < 1 || q > 20) {
       alert('Number of questions must be between 1 and 20.')
       return
     }
-    if (t < 1) {
-      alert('Time limit must be at least 1 minute.')
+    if (isNaN(t) || t < 1) {
+      alert('Time limit must be at least 1 minute. Please enter 1 or more.')
       return
     }
 
@@ -178,14 +178,14 @@ export default function QuizGenerator({ isOpen, onClose, classId, notes }: QuizG
                 <input
                   id="timeLimit"
                   type="number"
-                  min={1}
+                  min={0}
                   value={timeLimit}
                   onChange={(e) => {
                     const raw = e.target.value
-                    if (raw === '') setTimeLimit(1)
+                    if (raw === '') setTimeLimit(0)
                     else {
                       const v = parseInt(raw, 10)
-                      if (!isNaN(v)) setTimeLimit(v < 1 ? 1 : v)
+                      if (!isNaN(v) && v >= 0) setTimeLimit(v)
                     }
                   }}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
